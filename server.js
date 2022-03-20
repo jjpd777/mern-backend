@@ -12,7 +12,7 @@ const corsOptions ={
 
 dotenv.config();
 let linkToken = '';
-
+let safeToken = '';
 const fintoc = new Fintoc('sk_live_DWeF3Tfp2YCsVQoB3a-MPYAuz8JMLsb6');
 const app = express();
 app.use(
@@ -58,7 +58,8 @@ app.post('/webhook', bodyParser.raw({type: 'application/json'}), (request, respo
   
   // Add idempotency using the ORM being used by your app.
   // MORE SHIT ADDED
-  console.log("THIS IS IT DUDE",event.data)
+  console.log("THIS IS IT DUDE",event.data);
+  safeToken=event.data.link_token;
   // Handle the event
   switch (event.type) {
     case 'link.credentials_changed':
@@ -81,6 +82,16 @@ app.post('/webhook', bodyParser.raw({type: 'application/json'}), (request, respo
 
   // Return a response to acknowledge receipt of the event
   response.json({received: true});
+});
+
+app.get('/api/safeToken', async (req, res) => {
+  try {
+    console.log("safe token",safeToken)
+    res.json({secret: safeToken});
+  } catch (error) {
+    res.status(400);
+    res.json(error);
+  }
 });
 
 app.get('/api/getit', async (req, res) => {
