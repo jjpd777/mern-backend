@@ -57,6 +57,7 @@ app.post('/webhook', bodyParser.raw({type: 'application/json'}), (request, respo
   const event = request.body;
   
   // Add idempotency using the ORM being used by your app.
+  // MORE SHIT ADDED
   console.log("THIS IS IT DUDE",event.data)
   // Handle the event
   switch (event.type) {
