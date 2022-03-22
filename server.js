@@ -4,9 +4,28 @@ const dotenv = require('dotenv');
 const Fintoc = require('fintoc');
 const moment = require('moment');
 const cors = require('cors');
+var firebase = require('firebase');
+
+const firebaseConfig = {
+    apiKey: "AIzaSyCXnCuGlnN4zwLzGiX8JnICCD5OEd0prEs",
+    authDomain: "deploy-trial-dbdff.firebaseapp.com",
+    databaseURL: "https://deploy-trial-dbdff.firebaseio.com",
+    projectId: "deploy-trial-dbdff",
+    storageBucket: "deploy-trial-dbdff.appspot.com",
+    messagingSenderId: "134032290709",
+    appId: "1:134032290709:web:26af70eca2652de9a7bc9c"
+  };
+
+firebase.initializeApp(firebaseConfig);
+let database = firebase.database()
+
 
 const corsOptions ={
   origin:'*', 
+};
+
+function insertData(path, data) {
+  set(ref(database, path), data);
 };
 
 
@@ -53,12 +72,26 @@ app.post('/api/link_token', (req, res) => {
   res.send('Post request to /api/link_token');
 });
 
+app.get('/ping', (req, res) => {
+  database.ref("./fintocToken").set({obj:"data"}, function(error) {
+    if (error) {
+      // The write failed...
+      console.log("Failed with error: " + error)
+    } else {
+      // The write was successful...
+      console.log("success")
+    }
+})
+});
+
+
 app.post('/webhook', bodyParser.raw({type: 'application/json'}), (request, response) => {
   const event = request.body;
   
   // Add idempotency using the ORM being used by your app.
   // MORE SHIT ADDED
   console.log("THIS IS IT DUDE",event.data);
+  insertData(event.data);
   safeToken=event.data.link_token;
   // Handle the event
   switch (event.type) {

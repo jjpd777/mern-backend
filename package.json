@@ -22,6 +22,7 @@
     "eslint-plugin-import": "^2.22.1",
     "express": "^4.17.3",
     "fintoc": "^0.1.0",
+    "firebase": "^9.6.9",
     "moment": "^2.29.1"
   },
   "devDependencies": {
