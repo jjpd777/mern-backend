@@ -6,7 +6,7 @@ const express = require("express");
 const app = express();
 const cors = require("cors");
 require("dotenv").config({ path: "./config.env" });
-const CUSTOMERS_TABLE = "/customer-record";
+const CUSTOMERS_TABLE = "customer-record";
 
 const corsOptions ={
   origin:'*', 

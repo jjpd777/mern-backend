@@ -1,6 +1,6 @@
 const express = require("express");
 const MAIN_TABLE = "saldada-v1";
-const CUSTOMERS_TABLE = "/customer-record";
+const CUSTOMERS_TABLE = "customer-record";
 
 // recordRoutes is an instance of the express router.
 // We use it to define our routes.
@@ -39,15 +39,12 @@ recordRoutes.route(CUSTOMERS_TABLE).get(function (req, res) {
 // });
 
 // This section will help you create a new record.
-recordRoutes.route(CUSTOMERS_TABLE).post(function (req, response) {
+recordRoutes.route("/create").post(function (req, response) {
   let db_connect = dbo.getDb();
   console.log(req.body)
-  let myobj = {
-    name: req.body.name,
-    position: req.body.position,
-    level: req.body.level,
-  };
-  db_connect.collection(CUSTOMERS_TABLE).insertOne(myobj, function (err, res) {
+  const path = req.body.path;
+  const data = req.body.data;
+  db_connect.collection(path).insertOne(data, function (err, res) {
     if (err) throw err;
     response.json(res);
   });
