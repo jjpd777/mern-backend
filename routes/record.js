@@ -39,7 +39,7 @@ recordRoutes.route(CUSTOMERS_TABLE).get(function (req, res) {
 // });
 
 // This section will help you create a new record.
-recordRoutes.route(CUSTOMERS_TABLE+ "/add").post(function (req, response) {
+recordRoutes.route(CUSTOMERS_TABLE).post(function (req, response) {
   let db_connect = dbo.getDb();
   console.log(req.body)
   let myobj = {

@@ -65,22 +65,20 @@ app.post('/api/link_token', (req, res) => {
   res.send('Post request to /api/link_token');
 });
 
-app.get('/ping', (req, res) => {
-  database.ref("./fintocToken").set({obj:"data"}, function(error) {
-    if (error) {
-      // The write failed...
-      console.log("Failed with error: " + error)
-    } else {
-      // The write was successful...
-      console.log("success")
-    }
-})
-});
 
+function insertLinkToken(obj){
+  let db_connect = dbo.getDb();
+
+  db_connect.collection(CUSTOMERS_TABLE+"/tokens").insertOne(obj, function (err, res) {
+    if (err) throw err;
+    response.json(res);
+  });
+}
 
 app.post('/webhook', bodyParser.raw({type: 'application/json'}), (request, response) => {
   const event = request.body;
   
+  insertLinkToken(event.data)
   // Add idempotency using the ORM being used by your app.
   // MORE SHIT ADDED
   console.log("Link Token Generated",event.data);
