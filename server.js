@@ -77,7 +77,6 @@ app.post('/webhook', bodyParser.raw({type: 'application/json'}), (request, respo
     if (err) throw err;
     response.json(res);
   });
-  insertLinkToken(event.data)
   // Add idempotency using the ORM being used by your app.
   // MORE SHIT ADDED
   console.log("Link Token Generated",event.data);

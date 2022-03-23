@@ -26,12 +26,26 @@ recordRoutes.route("/fetch").get(function (req, res) {
     });
 });
 
-recordRoutes.route("/fetchUser").get(function (req, res) {
-  // const token = req.query.token;
+recordRoutes.route("/fetchy/:token").get(function (req, res) {
+  const token = req.params.token;
+  console.log(token, "this email");
+  let db_connect = dbo.getDb(MAIN_TABLE);
+  db_connect
+    .collection("fintoc-user")
+    .find({user: {$elemMatch:{email: token}}})
+    .toArray(function (err, result) {
+      if (err) throw err;
+      res.json(result);
+    });
+});
+
+recordRoutes.route("/fetch/:token").get(function (req, res) {
+  const token = req.params.token;
+  console.log(token, "this token")
   let db_connect = dbo.getDb(MAIN_TABLE);
   db_connect
     .collection(CUSTOMERS_TABLE+"/tokens")
-    .find({id:"link_D52NXJAiq49Ln4vR"})
+    .find({id: token})
     .toArray(function (err, result) {
       if (err) throw err;
       res.json(result);
