@@ -15,7 +15,7 @@ const ObjectId = require("mongodb").ObjectId;
 
 
 // This section will help you get a list of all the records.
-recordRoutes.route("/"+CUSTOMERS_TABLE).get(function (req, res) {
+recordRoutes.route("/fetch").get(function (req, res) {
   let db_connect = dbo.getDb(MAIN_TABLE);
   db_connect
     .collection(CUSTOMERS_TABLE)
@@ -25,6 +25,19 @@ recordRoutes.route("/"+CUSTOMERS_TABLE).get(function (req, res) {
       res.json(result);
     });
 });
+
+recordRoutes.route("/fetchUser").get(function (req, res) {
+  // const token = req.query.token;
+  let db_connect = dbo.getDb(MAIN_TABLE);
+  db_connect
+    .collection(CUSTOMERS_TABLE+"/tokens")
+    .find({id:"link_D52NXJAiq49Ln4vR"})
+    .toArray(function (err, result) {
+      if (err) throw err;
+      res.json(result);
+    });
+});
+
 
 // This section will help you get a single record by id
 // recordRoutes.route(CUSTOMERS_TABLE+"/:id").get(function (req, res) {
