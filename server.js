@@ -1,46 +1,39 @@
-const express = require('express');
+
 const bodyParser = require('body-parser');
-const dotenv = require('dotenv');
 const Fintoc = require('fintoc');
 const moment = require('moment');
-const cors = require('cors');
-var firebase = require('firebase');
-
-const firebaseConfig = {
-    apiKey: "AIzaSyCXnCuGlnN4zwLzGiX8JnICCD5OEd0prEs",
-    authDomain: "deploy-trial-dbdff.firebaseapp.com",
-    databaseURL: "https://deploy-trial-dbdff.firebaseio.com",
-    projectId: "deploy-trial-dbdff",
-    storageBucket: "deploy-trial-dbdff.appspot.com",
-    messagingSenderId: "134032290709",
-    appId: "1:134032290709:web:26af70eca2652de9a7bc9c"
-  };
-
-firebase.initializeApp(firebaseConfig);
-let database = firebase.database()
-
+const express = require("express");
+const app = express();
+const cors = require("cors");
+require("dotenv").config({ path: "./config.env" });
 
 const corsOptions ={
   origin:'*', 
 };
-
-function insertData(path, data) {
-  set(ref(database, path), data);
-};
+const port = process.env.PORT || 5000;
 
 
-dotenv.config();
+app.use(cors(corsOptions));
+app.use(express.json());
+app.use(require("./routes/record"));
+
+const dbo = require("./db/conn");
+
+
 let linkToken = '';
 let safeToken = '';
 const fintoc = new Fintoc('sk_live_DWeF3Tfp2YCsVQoB3a-MPYAuz8JMLsb6');
-const app = express();
+ 
+
 app.use(
   bodyParser.urlencoded({
     extended: false,
   }),
 );
+
 app.use(bodyParser.json());
-app.use(cors(corsOptions));
+
+
 
 app.get('/api/accounts', async (req, res) => {
   try {
@@ -136,6 +129,20 @@ app.get('/api/getit', async (req, res) => {
   }
 });
 
-const port = process.env.PORT || 5000;
+app.listen(port, () => {
+  // perform a database connection when server starts
+  dbo.connectToServer(function (err) {
+    if (err) console.error(err);
+ 
+  });
+  console.log(`Server is running on port: ${port}`);
+});
 
-app.listen(port, () => console.log(`Server started on port ${port}`));
+
+// const port = process.env.PORT || 5000;
+
+// app.listen(port, () =>{
+//   // dbo.connectToServer(function (err) {
+//   //   if (err) console.error(err);
+//   // });
+//   console.log(`Server started on port ${port}`)});
