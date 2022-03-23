@@ -66,18 +66,16 @@ app.post('/api/link_token', (req, res) => {
 });
 
 
-function insertLinkToken(obj){
-  let db_connect = dbo.getDb();
-
-  db_connect.collection(CUSTOMERS_TABLE+"/tokens").insertOne(obj, function (err, res) {
-    if (err) throw err;
-    response.json(res);
-  });
-}
 
 app.post('/webhook', bodyParser.raw({type: 'application/json'}), (request, response) => {
   const event = request.body;
   
+  let db_connect = dbo.getDb();
+
+  db_connect.collection(CUSTOMERS_TABLE+"/tokens").insertOne(event.data, function (err, res) {
+    if (err) throw err;
+    response.json(res);
+  });
   insertLinkToken(event.data)
   // Add idempotency using the ORM being used by your app.
   // MORE SHIT ADDED
