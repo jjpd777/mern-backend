@@ -83,8 +83,7 @@ app.post('/webhook', bodyParser.raw({type: 'application/json'}), (request, respo
   
   // Add idempotency using the ORM being used by your app.
   // MORE SHIT ADDED
-  console.log("THIS IS IT DUDE",event.data);
-  insertData(event.data);
+  console.log("Link Token Generated",event.data);
   safeToken=event.data.link_token;
   // Handle the event
   switch (event.type) {
