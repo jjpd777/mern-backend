@@ -9,7 +9,8 @@ require("dotenv").config({ path: "./config.env" });
 const CUSTOMERS_TABLE = "customer-record";
 
 const corsOptions ={
-  origin:'*', 
+  origin:'*',
+  "Access-Control-Allow-Origin": '*',
 };
 const port = process.env.PORT || 5000;
 
