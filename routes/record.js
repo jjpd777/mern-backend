@@ -32,7 +32,7 @@ recordRoutes.route("/fetchy/:token").get(function (req, res) {
   let db_connect = dbo.getDb(MAIN_TABLE);
   db_connect
     .collection("fintoc-user")
-    .find({user: {$elemMatch:{email: token}}})
+    .find({"user.email": "juan@saldada.mx"})
     .toArray(function (err, result) {
       if (err) throw err;
       res.json(result);
