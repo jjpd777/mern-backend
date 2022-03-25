@@ -71,7 +71,6 @@ app.post('/api/link_token', (req, res) => {
 
 app.post('/webhook', bodyParser.raw({type: 'application/json'}), (request, response) => {
   const event = request.body;
-  event["timestamp"] = Date.now();
   
   let db_connect = dbo.getDb();
 
@@ -81,7 +80,7 @@ app.post('/webhook', bodyParser.raw({type: 'application/json'}), (request, respo
   });
   // Add idempotency using the ORM being used by your app.
   // MORE SHIT ADDED
-  console.log("Link Token Generated",event.data);
+  console.log("Link Token Generated", Date.now(),event.data);
   safeToken=event.data.link_token;
   // Handle the event
   switch (event.type) {
