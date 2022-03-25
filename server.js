@@ -71,6 +71,7 @@ app.post('/api/link_token', (req, res) => {
 
 app.post('/webhook', bodyParser.raw({type: 'application/json'}), (request, response) => {
   const event = request.body;
+  event["timestamp"] = Date.now();
   
   let db_connect = dbo.getDb();
 
