@@ -72,7 +72,13 @@ function fintocURL(issueType, linkToken, page){
       (async () => {
         try {
           axios.all(listOfURLs.map((endpoint) => axios.get(endpoint, options))).then(
-            (data) =>{return objectParser(data)}
+            (data) =>{
+                console.log(typeof(data), data.length);
+                const k = Object.keys(data);
+                console.log(k, data[k[0]])
+
+                // k.map(x=> typeof(data[x]));
+                return data}
           );
       
         } catch (error) {
@@ -108,12 +114,16 @@ function fintocURL(issueType, linkToken, page){
       const p_received = listOfPetitions(parsedReceived);
       const p_issued = listOfPetitions(parsedIssued);
 
-      const asyncAllReceived =  await getAllData(p_received);
-      const asyncAllIssued =  await getAllData(p_issued);
+    //   const asyncAllReceived =  await getAllData(p_received);
+      const asyncAllIssued =  await getAllData(p_issued).then(x=>console.log(typeof(x)));
+    //   console.log(typeof(asyncAllIssued))
+    //   const k = Object.keys(asyncAllIssued);
+    //   const all_y = k.map(x, ix=> asyncAllIssued[k].data);
+    //   console.log(all_y.length)
     //   console.log(asyncAllIssued);
     //   console.log(asyncAllIssued);
 
-      
+      console.log(asyncAllIssued)
       res.json(fetchIssued.data);
     } catch (error) {
       console.log(error);
