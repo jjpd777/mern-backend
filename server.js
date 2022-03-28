@@ -12,12 +12,14 @@ const corsOptions ={
   origin:'*',
   "Access-Control-Allow-Origin": '*',
 };
+
 const port = process.env.PORT || 5000;
 
 
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(require("./routes/record"));
+app.use(require("./routes/dataProcessing"));
 
 const dbo = require("./db/conn");
 
@@ -124,6 +126,8 @@ app.get('/api/getit', async (req, res) => {
     res.json(error);
   }
 });
+
+
 
 app.listen(port, () => {
   // perform a database connection when server starts

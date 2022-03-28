@@ -13,6 +13,7 @@
   "author": "Paulina Araya",
   "license": "ISC",
   "dependencies": {
+    "axios": "^0.26.1",
     "body-parser": "^1.19.0",
     "concurrently": "^6.0.2",
     "cors": "^2.8.5",
@@ -24,7 +25,8 @@
     "fintoc": "^0.1.0",
     "firebase": "^9.6.9",
     "moment": "^2.29.1",
-    "mongodb": "^4.4.1"
+    "mongodb": "^4.4.1",
+    "parse-link-header": "^2.0.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.7"
