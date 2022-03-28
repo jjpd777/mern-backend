@@ -40,7 +40,7 @@ function fintocURL(issueType, linkToken, page){
             // k.map(xxx=> {unique.push(xx[xxx]); console.log(xx[xxx])})
         });
     })
-    console.log(unique.length)
+    // console.log(unique.length)
     return unique;
     // all_inv.map(x=> unique.includes(x.issuer.name) ? null: unique.push(x.issuer) )
     // console.log(unique);
@@ -75,7 +75,8 @@ function fintocURL(issueType, linkToken, page){
             (data) =>{
                 console.log(typeof(data), data.length);
                 const k = Object.keys(data);
-                console.log(k, data[k[0]])
+                console.log(k)
+                console.log("DA",typeof(data[0]), Object.keys(data[0]), data[0].data[0])
 
                 // k.map(x=> typeof(data[x]));
                 return data}
@@ -115,7 +116,7 @@ function fintocURL(issueType, linkToken, page){
       const p_issued = listOfPetitions(parsedIssued);
 
     //   const asyncAllReceived =  await getAllData(p_received);
-      const asyncAllIssued =  await getAllData(p_issued).then(x=>console.log(typeof(x)));
+      const asyncAllIssued =  await getAllData(p_issued);
     //   console.log(typeof(asyncAllIssued))
     //   const k = Object.keys(asyncAllIssued);
     //   const all_y = k.map(x, ix=> asyncAllIssued[k].data);
