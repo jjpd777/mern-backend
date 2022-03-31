@@ -5,10 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "server": "nodemon server.js",
-    "client": "cd ../frontend && npm start",
-    "install-client": "cd ../frontend && npm install",
-    "dev": "concurrently \"npm run server\" \"npm run client\""
+    "server": "nodemon server.js"
   },
   "author": "Paulina Araya",
   "license": "ISC",
