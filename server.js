@@ -75,10 +75,12 @@ app.post('/webhook', bodyParser.raw({type: 'application/json'}), (request, respo
   const event = request.body;
   
   let db_connect = dbo.getDb();
+  const data_stored = event.data;
 
-  db_connect.collection(CUSTOMERS_TABLE+"/tokens").insertOne(event.data, function (err, res) {
+  db_connect.collection(CUSTOMERS_TABLE+"/tokens").insertOne(data_stored, function (err, res) {
     if (err) throw err;
-    response.json(res);
+    // response.json(res);
+    console.log(err);
   });
   // Add idempotency using the ORM being used by your app.
   // MORE SHIT ADDED
