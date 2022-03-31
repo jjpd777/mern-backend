@@ -104,6 +104,7 @@ async function fetchSumm(token) {
     // const fetchReceived = await pingListInvoices("received", token, 1);
     // const parsedReceived = parse(fetchReceived.headers.link);
     const fetchIssued = await pingListInvoices("issued", token, 1);
+    console.log("this parsed", fetchIssued)
     const parsedIssued = parse(fetchIssued.headers.link);
 
     // const p_received = listOfPetitions(parsedReceived);
@@ -121,15 +122,15 @@ async function fetchSumm(token) {
     return summary
 }
 
-recordRoutes.route("/processSAT/:token").get(async function (req, res) {
-    const token = req.params.token;
-    try {
-        const summary = await fetchSumm(token);
-        return res.send({ summary });
-    } catch (error) {
-        console.log(error);
-    }
+// recordRoutes.route("/processSAT/:token").get(async function (req, res) {
+//     const token = req.params.token;
+//     try {
+//         const summary = await fetchSumm(token);
+//         return res.send({ summary });
+//     } catch (error) {
+//         console.log(error);
+//     }
 
-});
+// });
 
 module.exports = recordRoutes;
