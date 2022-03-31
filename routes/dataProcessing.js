@@ -2,7 +2,7 @@ const express = require("express");
 const MAIN_TABLE = "saldada-v1";
 const CUSTOMERS_TABLE = "customer-record";
 const recordRoutes = express.Router();
-const axios = require('axios');
+const axios = require('./lib/axios');
 var parse = require('parse-link-header');
 
 function fintocURL(issueType, linkToken, page) {
