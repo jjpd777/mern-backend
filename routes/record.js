@@ -70,7 +70,7 @@ recordRoutes.route("/fetchLinkToken/:token").get(function (req, res) {
 // This section will help you create a new record.
 recordRoutes.route("/create").post(function (req, response) {
   let db_connect = dbo.getDb();
-  console.log(req.body)
+  console.log(req.body, "the body request")
   const path = req.body.path;
   const data = req.body.data;
   db_connect.collection(path).insertOne(data, function (err, res) {
