@@ -9,7 +9,8 @@ function fintocURL(issueType, linkToken, page) {
     const lt = "link_token=" + linkToken;
     const it = "&issue_type=" + issueType;
     const pg = "&page=" + String(page);
-    return 'https://api.fintoc.com/v1/invoices?' + lt + it + pg;
+    const since = "&since=2020-01-01T00:00:00.000Z"
+    return 'https://api.fintoc.com/v1/invoices?' + lt + it + since + pg;
 
 };
 
@@ -27,7 +28,7 @@ const pingListInvoices = async (issueType, linkToken, page) => {
 
 function getUniqueSellers(all) {
     var u = {};
-    all.map(x => u[x.issuer.id] ? u[x.issuer.id].push(x) : u[x.issuer.id] = [x] );
+    all.map(x => u[x.issuer.id] ? u[x.issuer.id].push(x) : u[x.issuer.id] = [x]);
     // console.log(u, "here baby")
     return u;
 }
@@ -35,7 +36,7 @@ function getUniqueSellers(all) {
 
 function getUniqueBuyers(all) {
     var u = {};
-    all.map(x => u[x.receiver.id] ? u[x.receiver.id].push(x) : u[x.receiver.id] = [x] );
+    all.map(x => u[x.receiver.id] ? u[x.receiver.id].push(x) : u[x.receiver.id] = [x]);
     // console.log(u, "INGETELCA CUSTOMERS");
     return u;
 }
@@ -72,62 +73,62 @@ function listOfPetitions(pagesObject) {
     return r;
 };
 
-function summarizeCompany(invoices){
+function summarizeCompany(invoices) {
     var global = [];
     const k = Object.keys(invoices);
-    k.map( rfc=>{
-        var summary={
+    k.map(rfc => {
+        var summary = {
             customer_rfc: rfc,
+            customer_name: invoices[rfc][0].receiver.name,
             totalSales: 0,
-            tax_period:{}
+            tax_period: {}
         }
-        invoices[rfc].map( item =>{
-            summary.totalSales+= Number(item.total_amount);
+        invoices[rfc].map(item => {
+            summary.totalSales += Number(item.total_amount);
             const ins = {
-                customer_name: item.issuer.name, 
+                customer_name: item.receiver.name,
                 ticket_amount: item.total_amount,
             }
-            if(!summary.tax_period[item.tax_period]){
-               summary.tax_period[item.tax_period] = [ins]
-            }else{
+            if (!summary.tax_period[item.tax_period]) {
+                summary.tax_period[item.tax_period] = [ins]
+            } else {
                 summary.tax_period[item.tax_period].push(ins);
             }
         })
         global.push(summary);
     })
-    console.log(global);
+    return global;
 }
 
+async function fetchSumm(token) {
+    // const fetchReceived = await pingListInvoices("received", token, 1);
+    // const parsedReceived = parse(fetchReceived.headers.link);
+    const fetchIssued = await pingListInvoices("issued", token, 1);
+    const parsedIssued = parse(fetchIssued.headers.link);
 
+    // const p_received = listOfPetitions(parsedReceived);
+    const p_issued = listOfPetitions(parsedIssued);
 
-recordRoutes.route("/processSAT/:token").get(function (req, res) {
+    // const asyncAllReceived = await getAllData(p_received);
+    const asyncAllIssued = await getAllData(p_issued);
+
+    // console.log(asyncAllReceived.length, "Received tax invoices");
+    console.log(asyncAllIssued.length, "Issued tax invoices");
+
+    // const groupedSellers = getUniqueSellers(asyncAllReceived);
+    const groupedBuyers = getUniqueBuyers(asyncAllIssued);
+    const summary = summarizeCompany(groupedBuyers);
+    return summary
+}
+
+recordRoutes.route("/processSAT/:token").get(async function (req, res) {
     const token = req.params.token;
-
-    (async () => {
-        try {
-            const fetchReceived = await pingListInvoices("received", token, 1);
-            const parsedReceived = parse(fetchReceived.headers.link);
-            const fetchIssued = await pingListInvoices("issued", token, 1);
-            const parsedIssued = parse(fetchIssued.headers.link);
-
-            const p_received = listOfPetitions(parsedReceived);
-            const p_issued = listOfPetitions(parsedIssued);
-
-            const asyncAllReceived = await getAllData(p_received);
-            const asyncAllIssued = await getAllData(p_issued);
-
-            console.log(asyncAllReceived.length, "Received tax invoices");
-            console.log(asyncAllIssued.length, "Issued tax invoices");
-
-            const groupedSellers = getUniqueSellers(asyncAllReceived);
-            const groupedBuyers = getUniqueBuyers(asyncAllIssued);
-            summarizeCompany(groupedBuyers);
-
-            res.json(fetchIssued.data);
-        } catch (error) {
-            console.log(error);
-        }
-    })();
+    try {
+        const summary = await fetchSumm(token);
+        return res.send({ summary });
+    } catch (error) {
+        console.log(error);
+    }
 
 });
 
