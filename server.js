@@ -10,6 +10,7 @@ const CUSTOMERS_TABLE = "customer-record";
 
 const corsOptions ={
   origin:'*',
+  "Access-Control-Allow-Origin": '*',
 };
 
 const port = process.env.PORT || 5000;
