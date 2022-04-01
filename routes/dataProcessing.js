@@ -81,18 +81,22 @@ function summarizeCompany(invoices) {
             customer_rfc: rfc,
             customer_name: invoices[rfc][0].receiver.name,
             totalSales: 0,
-            tax_period: {}
+            tax_period: {},
+            tax_period_sub:{}
         }
         invoices[rfc].map(item => {
             summary.totalSales += Number(item.total_amount);
             const ins = {
-                customer_name: item.receiver.name,
+                ticket_date: item.date,
                 ticket_amount: item.total_amount,
             }
-            if (!summary.tax_period[item.tax_period]) {
-                summary.tax_period[item.tax_period] = [ins]
+            const txp = item.tax_period
+            if (!summary.tax_period[txp]) {
+                summary.tax_period[txp] = [ins];
+                summary.tax_period_sub[txp] = Number(item.total_amount )
             } else {
-                summary.tax_period[item.tax_period].push(ins);
+                summary.tax_period[txp].push(ins);
+                summary.tax_period_sub[txp] += Number(item.total_amount);
             }
         })
         global.push(summary);
@@ -101,16 +105,16 @@ function summarizeCompany(invoices) {
 }
 
 async function fetchSumm(token) {
+
     // const fetchReceived = await pingListInvoices("received", token, 1);
     // const parsedReceived = parse(fetchReceived.headers.link);
-    const fetchIssued = await pingListInvoices("issued", token, 1);
-    console.log("this parsed", fetchIssued)
-    const parsedIssued = parse(fetchIssued.headers.link);
-
     // const p_received = listOfPetitions(parsedReceived);
-    const p_issued = listOfPetitions(parsedIssued);
-
     // const asyncAllReceived = await getAllData(p_received);
+
+
+    const fetchIssued = await pingListInvoices("issued", token, 1);
+    const parsedIssued = parse(fetchIssued.headers.link);
+    const p_issued = listOfPetitions(parsedIssued);
     const asyncAllIssued = await getAllData(p_issued);
 
     // console.log(asyncAllReceived.length, "Received tax invoices");
