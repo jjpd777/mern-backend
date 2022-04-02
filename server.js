@@ -11,7 +11,8 @@ const CUSTOMERS_TABLE = "customer-record";
 const corsOptions ={
   origin:'*',
   "Access-Control-Allow-Origin": '*',
-  
+  credentials:true,            //access-control-allow-credentials:true
+  optionSuccessStatus:200,
 };
 
 const port = process.env.PORT || 5000;
@@ -21,6 +22,8 @@ app.use(cors(corsOptions));
 app.use(express.json());
 app.use(require("./routes/record"));
 app.use(require("./routes/dataProcessing"));
+app.use(require("./routes/belvo"));
+
 
 const dbo = require("./db/conn");
 

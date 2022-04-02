@@ -128,6 +128,7 @@ async function fetchSumm(token) {
 
 recordRoutes.route("/processSAT/:token").get(async function (req, res) {
     const token = req.params.token;
+    console.log("fetched token", token)
     try {
         const summary = await fetchSumm(token);
         return res.send({ summary });
