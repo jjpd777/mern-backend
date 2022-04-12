@@ -20,7 +20,7 @@ const pingListInvoices = async (issueType, linkToken, page) => {
     };
     const d = fintocURL(issueType, linkToken, page);
     return axios.get(d, options)
-        .then(response => { return response })
+        .then(response => { console.log("ping response",response); return response })
         .catch(err => console.error(err));
 };
 
@@ -86,9 +86,12 @@ function summarizeCompany(invoices) {
         }
         invoices[rfc].map(item => {
             summary.totalSales += Number(item.total_amount);
+            if(rfc==="UME141031DR0"){
+                console.log("UFINET",item);
+            }
             const ins = {
                 ticket_date: item.date,
-                ticket_amount: item.total_amount,
+                ticket_amount: Number(item.total_amount),
             }
             const txp = item.tax_period
             if (!summary.tax_period[txp]) {
@@ -113,6 +116,7 @@ async function fetchSumm(token) {
 
 
     const fetchIssued = await pingListInvoices("issued", token, 1);
+    // console.log(fetchIssued)
     const parsedIssued = parse(fetchIssued.headers.link);
     const p_issued = listOfPetitions(parsedIssued);
     const asyncAllIssued = await getAllData(p_issued);
@@ -131,6 +135,18 @@ recordRoutes.route("/processSAT/:token").get(async function (req, res) {
     console.log("fetched token", token)
     try {
         const summary = await fetchSumm(token);
+        return res.send({ summary });
+    } catch (error) {
+        console.log(error);
+    }
+
+});
+
+recordRoutes.route("/testSAT/:token").get(async function (req, res) {
+    const token = req.params.token;
+    console.log("fetched token", token)
+    try {
+        const summary = await pingListInvoices("issued",token,1);
         return res.send({ summary });
     } catch (error) {
         console.log(error);
