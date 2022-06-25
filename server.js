@@ -21,6 +21,7 @@ const port = process.env.PORT || 5000;
 app.use(cors(corsOptions));
 app.use(express.json());
 app.use(require("./routes/record"));
+app.use(require("./routes/epicor"));
 app.use(require("./routes/dataProcessing"));
 app.use(require("./routes/belvo"));
 
@@ -126,7 +127,7 @@ app.get('/api/safeToken', async (req, res) => {
 
 app.get('/api/getit', async (req, res) => {
   try {
-    res.json({gotit:"Fam"});
+    res.json({gotit:"This is working"});
   } catch (error) {
     res.status(400);
     res.json(error);
