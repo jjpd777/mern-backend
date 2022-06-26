@@ -1,59 +1,45 @@
 const express = require("express");
 const MAIN_TABLE = "saldada-v1";
 const CUSTOMERS_TABLE = "terms";
-
-
-// recordRoutes is an instance of the express router.
-// We use it to define our routes.
-// The router will be added as a middleware and will take control of requests starting with path /record.
 const recordRoutes = express.Router();
-
-// This will help us connect to the database
 const dbo = require("../db/conn");
+const ObjectId = require('mongodb').ObjectId;
 
-recordRoutes.route("/create").post(function (req, response) {
+
+
+
+recordRoutes.route("/insert").post(function (req, response) {
+  const path = req.body.path; const data = req.body;
   let db_connect = dbo.getDb(MAIN_TABLE);
-  console.log(req.body, "the body request")
-  const path = "/testing/epicor";
-  const data = {
-    admin:{
-        created_by:"juan@gmail.com",
-        uid: "thisfsdfjjf99fjsd",
-        deleted: "false"
-    },
-    customer:{
-        company_name:"Name of Company",
-        fiscal_id: "RFC or RUT",
-        email: "juan@gmail.com",
-        phone:"+17863016023",
-    },
-    link:{
-        company: "Name of Company Linked",
-        erp: "Name of ERP linked",
-        status: "active or pending",
-        country: "Mexico or Chile",
-        last_refreshed:"timestamp"
-    },
-    xlsx : {
-        "01-07-2022" : "https://www.firebase.com/xlsx/01-07-2022.xlsx",
-        "02-07-2022" : "https://www.firebase.com/xlsx/01-07-2022.xlsx",
-        "03-07-2022" : "https://www.firebase.com/xlsx/01-07-2022.xlsx",
-        "04-07-2022" : "https://www.firebase.com/xlsx/01-07-2022.xlsx",
-    }
 
-};
   db_connect.collection(path).insertOne(data, function (err, res) {
     if (err) throw err;
     response.json(res);
   });
 });
 
+recordRoutes.route("/read/link/:id").get(async function (req, res) {
+  const id = req.params.id;
+  let db_connect = dbo.getDb(MAIN_TABLE);
+  const result = await db_connect
+    .collection("link_table")
+    .findOne({"_id": ObjectId(id)});
+    console.log(result)
+  if(result){
+    res.send(result)
+  }
+  else{
+    res.send({message:"terrible error just happened"})
+  }
 
-// This section will help you get a list of all the records.
-recordRoutes.route("/fetchEpicor").get(function (req, res) {
+});
+
+recordRoutes.route("/read/list/:table").get(function (req, res) {
+  const path = req.params.table;
+  console.log(path);
   let db_connect = dbo.getDb(MAIN_TABLE);
   db_connect
-    .collection(CUSTOMERS_TABLE)
+    .collection("link_table")
     .find({})
     .toArray(function (err, result) {
       if (err) throw err;
