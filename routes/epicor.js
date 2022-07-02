@@ -73,17 +73,17 @@ recordRoutes.route("/insertData").get(async function (req, response) {
 
     console.log(dbentry.length);
   
+    const headers = { 
+      'Authorization': 'Bearer my-token',
+      'My-Custom-Header': 'foobar'
+  };
+    axios.post( 'https://whbackend.herokuapp.com/receive_information', {body: dbentry[0]}, {headers} )
 
-
-    // response.send({status: dbentry})
+    response.send({status: dbentry})
   
   });
-  const headers = { 
-    'Authorization': 'Bearer my-token',
-    'My-Custom-Header': 'foobar'
-};
-  axios.post( 'https://whbackend.herokuapp.com/receive_information', {body: dbentry}, {headers} )
-  response.send(dbentry)
+
+  // response.send(dbentry)
 
   /// write csv file to MongoDB
   /// potentially, break it down in several steps
@@ -92,8 +92,6 @@ recordRoutes.route("/insertData").get(async function (req, response) {
 recordRoutes.route("/receive_information").post(function (req, options) {
   const path = req.body.path;
   console.log(req.body, "the body");
-  console.log(req.data, "the data")
-
   console.log(req);
 });
 
