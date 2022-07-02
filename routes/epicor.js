@@ -52,12 +52,12 @@ recordRoutes.route("/read/list/:table").get(function (req, res) {
     });
 });
 
-recordRoutes.route("/insertData").get(function (req, response) {
+recordRoutes.route("/insertData").get(async function (req, response) {
   let db_connect = dbo.getDb(MAIN_TABLE);
   /// read the csv file
   const dest_exel = "https://firebasestorage.googleapis.com/v0/b/saldada-dev.appspot.com/o/xepelin_sample.xlsx%20-%20Worksheet.tsv?alt=media&token=390ab1a4-2278-40bc-acac-6e9a33d52a46";
-  axios.get(dest_exel, options).then(response => { 
-    const other_data = response.data.split("\r\n");
+  const dbentry = await axios.get(dest_exel, options).then(d => { 
+    const other_data = d.data.split("\r\n");
     const reference_keys = other_data[0].split("\t");
     const dbentry = [];
     other_data.map( (row, ix)=>{
@@ -71,26 +71,28 @@ recordRoutes.route("/insertData").get(function (req, response) {
       }
     });
 
-    console.log(dbentry.length)
-
-
-    return response
+    console.log(dbentry.length);
   
-  })
+
+
+    // response.send({status: dbentry})
+  
+  });
+  const headers = { 
+    'Authorization': 'Bearer my-token',
+    'My-Custom-Header': 'foobar'
+};
+  axios.post( 'https://whbackend.herokuapp.com/receive_information', {body: dbentry}, {headers} )
+  response.send(dbentry)
 
   /// write csv file to MongoDB
   /// potentially, break it down in several steps
-
-  db_connect.collection("sample_xepe").insertOne({"sample":"data"}, function (err, res) {
-    if (err) throw err;
-    response.json(res);
-  });
 });
 
-recordRoutes.route("/receive_information").post(function (req, response) {
-  const path = req.body.path; const data = req.body;
-  let db_connect = dbo.getDb(MAIN_TABLE);
-  console.log(data);
+recordRoutes.route("/receive_information").post(function (req, options) {
+  const path = req.body.path;
+
+  console.log(req);
 });
 
 
