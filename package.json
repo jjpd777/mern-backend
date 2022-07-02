@@ -24,6 +24,7 @@
     "firebase": "^9.6.9",
     "moment": "^2.29.1",
     "mongodb": "^4.4.1",
+    "node-fetch": "^3.2.6",
     "parse-link-header": "^2.0.0"
   },
   "devDependencies": {
