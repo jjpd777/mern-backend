@@ -91,6 +91,8 @@ recordRoutes.route("/insertData").get(async function (req, response) {
 
 recordRoutes.route("/receive_information").post(function (req, options) {
   const path = req.body.path;
+  console.log(req.body, "the body");
+  console.log(req.data, "the data")
 
   console.log(req);
 });
