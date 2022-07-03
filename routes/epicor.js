@@ -74,7 +74,7 @@ recordRoutes.route("/insertData").get(async function (req, response) {
       }
     });
     console.log(temp_data.length);
-    axios.post( 'https://whbackend.herokuapp.com/receive_information', {body: temp_data[0]}, {headers} ).then( x=> response.send({value: "success"}))
+    axios.post( 'https://whbackend.herokuapp.com/receive_information', {body: temp_data[0]}, {headers} );
     // return temp_data;
     response.send({status: temp_data})  
   });
@@ -88,9 +88,10 @@ recordRoutes.route("/insertData").get(async function (req, response) {
   /// potentially, break it down in several steps
 });
 
-recordRoutes.route("/receive_information").post(function (req, options) {
+recordRoutes.route("/receive_information").post(function (req, response) {
 try{
   console.log(req.body, "the body");
+  response.send({"status": "everything gucci"})
 
 }catch (e){
   console.log(e)
