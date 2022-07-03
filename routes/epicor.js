@@ -87,11 +87,13 @@ recordRoutes.route("/insertData").get(async function (req, response) {
       });
       
       const structured_petitions = structure_petitions_body(parsed_data);
-      console.log(structured_petitions[structured_petitions.length-1]);
-
+      // console.log(structured_petitions[structured_petitions.length-1]);
+      const hrk = 'https://whbackend.herokuapp.com/receive_information';
+      const lcl = 'http://localhost:5000/receive_information';
       structured_petitions.map( petition =>{
-        axios.post( 'https://whbackend.herokuapp.com/receive_information', {body: petition}, {headers} ).then( r =>{ console.log(r.data)})
+        axios.post( hrk , {data: petition}, {headers} ).then( r =>{ console.log(r.data)})
       })
+        // axios.post( 'http://localhost:5000/receive_information' , {data: structured_petitions[0]}, {headers} ).then( r =>{ console.log("r.data")})
 
       // axios.post( 'https://whbackend.herokuapp.com/receive_information', {body: structured_petitions[0]}, {headers} ).then( r =>{ console.log(r.data)})
 
@@ -109,8 +111,9 @@ recordRoutes.route("/insertData").get(async function (req, response) {
 
 recordRoutes.route("/receive_information").post(function (req, response) {
 try{
-  console.log("The information is being passed on correctly:", req.body[0]);
-  response.send({"status": "everything gucci"})
+  console.log( req.body.data.length, "The information is being passed on correctly:");
+  response.send({"status": "everything gucci"});
+  console.log("TERRIFIC")
 
 }catch (e){
   console.log(e)
