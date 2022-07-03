@@ -52,36 +52,35 @@ recordRoutes.route("/read/list/:table").get(function (req, res) {
     });
 });
 
+const headers = { 
+  'Authorization': 'Bearer my-token',
+  'My-Custom-Header': 'foobar'
+};
+
 recordRoutes.route("/insertData").get(async function (req, response) {
   let db_connect = dbo.getDb(MAIN_TABLE);
   /// read the csv file
-  const dest_exel = "https://firebasestorage.googleapis.com/v0/b/saldada-dev.appspot.com/o/xepelin_sample.xlsx%20-%20Worksheet.tsv?alt=media&token=390ab1a4-2278-40bc-acac-6e9a33d52a46";
-  const dbentry = await axios.get(dest_exel, options).then(d => { 
-    const other_data = d.data.split("\r\n");
-    const reference_keys = other_data[0].split("\t");
-    const dbentry = [];
-    other_data.map( (row, ix)=>{
+  const data_origin = "https://firebasestorage.googleapis.com/v0/b/saldada-dev.appspot.com/o/xepelin_sample.xlsx%20-%20Worksheet.tsv?alt=media&token=390ab1a4-2278-40bc-acac-6e9a33d52a46";
+  const fetched_data = await axios.get(data_origin, options)
+    .then(data_tsv => { 
+    const tsv_split = data_tsv.data.split("\r\n"); const reference_keys = tsv_split[0].split("\t"); const temp_data = [];
+    tsv_split.map( (row, ix)=>{
       if(ix!==0){
-        const d = row.split("\t");
-        const objct = {};
+        const d = row.split("\t"); const objct = {};
         d.map( (x, index) =>{
           objct[reference_keys[index]]= x
         })
-        dbentry.push(objct);
+        temp_data.push(objct);
       }
     });
-
-    console.log(dbentry.length);
-  
-    const headers = { 
-      'Authorization': 'Bearer my-token',
-      'My-Custom-Header': 'foobar'
-  };
-    axios.post( 'https://whbackend.herokuapp.com/receive_information', {body: dbentry[0]}, {headers} )
-
-    response.send({status: dbentry})
-  
+    console.log(temp_data.length);
+    axios.post( 'https://whbackend.herokuapp.com/receive_information', {body: temp_data[0]}, {headers} ).then( x=> response.send({value: "success"}))
+    // return temp_data;
+    response.send({status: temp_data})  
   });
+  console.log("This is the operation response", fetched_data);
+
+  // await axios.post( 'https://whbackend.herokuapp.com/receive_information', {body: fetched_data[0]}, {headers} ).then( x=> response.send({value: "success"}))
 
   // response.send(dbentry)
 
@@ -90,9 +89,12 @@ recordRoutes.route("/insertData").get(async function (req, response) {
 });
 
 recordRoutes.route("/receive_information").post(function (req, options) {
-  const path = req.body.path;
+try{
   console.log(req.body, "the body");
-  console.log(req);
+
+}catch (e){
+  console.log(e)
+}
 });
 
 
