@@ -57,28 +57,47 @@ const headers = {
   'My-Custom-Header': 'foobar'
 };
 
+function structure_petitions_body(parsed_data){
+  const petitions_arr = [];
+  const sub_arrays = Math.floor(parsed_data.length / 30) 
+  const remainder = parsed_data.length % 30;
+
+  for( let i =0; i< sub_arrays; i++){
+    petitions_arr.push( parsed_data.slice(i*30, (i+1)*30))
+  };
+  if(remainder !== 0){
+    petitions_arr.push(parsed_data.slice( sub_arrays * 30 , ( sub_arrays*30 ) + remainder))
+  }
+  return petitions_arr;
+}
+
 recordRoutes.route("/insertData").get(async function (req, response) {
-  let db_connect = dbo.getDb(MAIN_TABLE);
   /// read the csv file
   const data_origin = "https://firebasestorage.googleapis.com/v0/b/saldada-dev.appspot.com/o/xepelin_sample.xlsx%20-%20Worksheet.tsv?alt=media&token=390ab1a4-2278-40bc-acac-6e9a33d52a46";
-  const fetched_data = await axios.get(data_origin, options)
+  await axios.get(data_origin, options)
     .then(data_tsv => { 
-    const tsv_split = data_tsv.data.split("\r\n"); const reference_keys = tsv_split[0].split("\t"); const temp_data = [];
-    tsv_split.map( (row, ix)=>{
-      if(ix!==0){
-        const d = row.split("\t"); const objct = {};
-        d.map( (x, index) =>{
-          objct[reference_keys[index]]= x
-        })
-        temp_data.push(objct);
-      }
-    });
-    console.log(temp_data.length);
-    axios.post( 'https://whbackend.herokuapp.com/receive_information', {body: temp_data[0]}, {headers} );
-    // return temp_data;
-    response.send({status: temp_data})  
+      const tsv_split = data_tsv.data.split("\r\n"); const reference_keys = tsv_split[0].split("\t");
+      const parsed_data = []; 
+      tsv_split.map( (row, ix)=>{
+        if(ix!==0){
+          const d = row.split("\t"); const objct = {};
+          d.map( (x, index) =>{ objct[reference_keys[index]]= x })
+          parsed_data.push(objct);
+        };
+      });
+      
+      const structured_petitions = structure_petitions_body(parsed_data);
+      console.log(structured_petitions[structured_petitions.length-1]);
+
+      structured_petitions.map( petition =>{
+        axios.post( 'https://whbackend.herokuapp.com/receive_information', {body: petition}, {headers} ).then( r =>{ console.log(r.data)})
+      })
+
+      // axios.post( 'https://whbackend.herokuapp.com/receive_information', {body: structured_petitions[0]}, {headers} ).then( r =>{ console.log(r.data)})
+
+      response.send({status: parsed_data})  
   });
-  console.log("This is the operation response", fetched_data);
+  //
 
   // await axios.post( 'https://whbackend.herokuapp.com/receive_information', {body: fetched_data[0]}, {headers} ).then( x=> response.send({value: "success"}))
 
@@ -90,7 +109,7 @@ recordRoutes.route("/insertData").get(async function (req, response) {
 
 recordRoutes.route("/receive_information").post(function (req, response) {
 try{
-  console.log(req.body, "the body");
+  console.log("The information is being passed on correctly:", req.body[0]);
   response.send({"status": "everything gucci"})
 
 }catch (e){
