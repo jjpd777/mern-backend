@@ -52,10 +52,6 @@ recordRoutes.route("/read/list/:table").get(function (req, res) {
     });
 });
 
-const headers = { 
-  'Authorization': 'Bearer my-token',
-  'My-Custom-Header': 'foobar'
-};
 
 function structure_petitions_body(parsed_data){
   const petitions_arr = [];
@@ -80,40 +76,41 @@ recordRoutes.route("/insertData").get(async function (req, response) {
       const parsed_data = []; 
       tsv_split.map( (row, ix)=>{
         if(ix!==0){
-          const d = row.split("\t"); const objct = {};
+          const d = row.split("\t"); const objct = {
+            "enterprise" : "AGROSUPER",
+            "dependency_score" : "TOP_SUPPLIER",
+            "year_first_purchase" : "2017",
+            "average_purchase" : "44,7994.00"
+          };
           d.map( (x, index) =>{ objct[reference_keys[index]]= x })
           parsed_data.push(objct);
         };
       });
       
+      const postReqHeaders = { 
+        'Authorization': 'RAUL-JOAQUIN-JUAN-2022',
+        'Accept': 'application/json',
+      };
+
       const structured_petitions = structure_petitions_body(parsed_data);
-      // console.log(structured_petitions[structured_petitions.length-1]);
       const hrk = 'https://whbackend.herokuapp.com/receive_information';
       const lcl = 'http://localhost:5000/receive_information';
       structured_petitions.map( petition =>{
-        axios.post( hrk , {data: petition}, {headers} ).then( r =>{ console.log(r.data)})
+        axios.post( lcl , {data: petition}, {postReqHeaders} ).then( r =>{ console.log(r.data)})
       })
-        // axios.post( 'http://localhost:5000/receive_information' , {data: structured_petitions[0]}, {headers} ).then( r =>{ console.log("r.data")})
-
-      // axios.post( 'https://whbackend.herokuapp.com/receive_information', {body: structured_petitions[0]}, {headers} ).then( r =>{ console.log(r.data)})
-
       response.send({status: parsed_data})  
   });
-  //
-
-  // await axios.post( 'https://whbackend.herokuapp.com/receive_information', {body: fetched_data[0]}, {headers} ).then( x=> response.send({value: "success"}))
-
-  // response.send(dbentry)
-
-  /// write csv file to MongoDB
-  /// potentially, break it down in several steps
 });
 
 recordRoutes.route("/receive_information").post(function (req, response) {
+const summary =  'Entered a total of ' + req.body.data.length;
 try{
   console.log( req.body.data.length, "The information is being passed on correctly:");
-  response.send({"status": "everything gucci"});
-  console.log("TERRIFIC")
+  response.send({
+    "status": 200,
+    'message' : 'information posted successfully!',
+    'summary' : summary
+  });
 
 }catch (e){
   console.log(e)
