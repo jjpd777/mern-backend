@@ -96,21 +96,24 @@ recordRoutes.route("/insertData").get(async function (req, response) {
       const hrk = 'https://whbackend.herokuapp.com/receive_information';
       const lcl = 'http://localhost:5000/receive_information';
       structured_petitions.map( petition =>{
-        axios.post( hrk , {data: petition}, {postReqHeaders} ).then( r =>{ console.log(r.data)})
+        axios.post( lcl , {data: petition}, {postReqHeaders} ).then( r =>{ console.log(r.data)})
       })
+      // axios.post( lcl , {data: structured_petitions[0]}, {postReqHeaders} ).then( r =>{ console.log(r.data)})
       response.send({status: parsed_data})  
   });
 });
 
 recordRoutes.route("/receive_information").post(function (req, response) {
 const summary =  'Entered a total of ' + req.body.data.length;
-try{
-  const path = req.headers.enterprise; const data = req.body.data;
-  let db_connect = dbo.getDb(MAIN_TABLE);
 
-  db_connect.collection(path).insertOne(JSON.stringify({...data}), function (err, res) {
+try{
+  console.log(req)
+  const path = req.header.enterprise; const data = req.body.data;
+  let db_connect = dbo.getDb(MAIN_TABLE);
+  console.log("total number of documents", data.length )
+
+  db_connect.collection("AGROSUPER").insertMany( data, function (err, res) {
     if (err) throw err;
-    response.json(res);
   });
   response.send({
     "status": 200,
