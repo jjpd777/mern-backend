@@ -77,7 +77,6 @@ recordRoutes.route("/insertData").get(async function (req, response) {
       tsv_split.map( (row, ix)=>{
         if(ix!==0){
           const d = row.split("\t"); const objct = {
-            "enterprise" : "AGROSUPER",
             "dependency_score" : "TOP_SUPPLIER",
             "year_first_purchase" : "2017",
             "average_purchase" : "44,7994.00"
@@ -90,13 +89,14 @@ recordRoutes.route("/insertData").get(async function (req, response) {
       const postReqHeaders = { 
         'Authorization': 'RAUL-JOAQUIN-JUAN-2022',
         'Accept': 'application/json',
+        'enterprise' : "AGROSUPER",
       };
 
       const structured_petitions = structure_petitions_body(parsed_data);
       const hrk = 'https://whbackend.herokuapp.com/receive_information';
       const lcl = 'http://localhost:5000/receive_information';
       structured_petitions.map( petition =>{
-        axios.post( lcl , {data: petition}, {postReqHeaders} ).then( r =>{ console.log(r.data)})
+        axios.post( hrk , {data: petition}, {postReqHeaders} ).then( r =>{ console.log(r.data)})
       })
       response.send({status: parsed_data})  
   });
@@ -105,7 +105,13 @@ recordRoutes.route("/insertData").get(async function (req, response) {
 recordRoutes.route("/receive_information").post(function (req, response) {
 const summary =  'Entered a total of ' + req.body.data.length;
 try{
-  console.log( req.body.data.length, "The information is being passed on correctly:");
+  const path = req.headers.enterprise; const data = req.body.data;
+  let db_connect = dbo.getDb(MAIN_TABLE);
+
+  db_connect.collection(path).insertOne(JSON.stringify({...data}), function (err, res) {
+    if (err) throw err;
+    response.json(res);
+  });
   response.send({
     "status": 200,
     'message' : 'information posted successfully!',
