@@ -14,9 +14,12 @@ function fintocURL(issueType, linkToken, page) {
 
 };
 
+
 const pingListInvoices = async (issueType, linkToken, page) => {
     const options = {
-        headers: { Accept: 'application/json', Authorization: 'sk_live_DWeF3Tfp2YCsVQoB3a-MPYAuz8JMLsb6' }
+        headers: { Accept: 'application/json', Authorization: 'sk_live_DWeF3Tfp2YCsVQoB3a-MPYAuz8JMLsb6',
+        'Access-Control-Allow-Origin' : '*'
+    }
     };
     const d = fintocURL(issueType, linkToken, page);
     return axios.get(d, options)
@@ -44,7 +47,9 @@ function getUniqueBuyers(all) {
 
 async function getAllData(listOfURLs) {
     const options = {
-        headers: { Accept: 'application/json', Authorization: 'sk_live_DWeF3Tfp2YCsVQoB3a-MPYAuz8JMLsb6' }
+        headers: { Accept: 'application/json', Authorization: 'sk_live_DWeF3Tfp2YCsVQoB3a-MPYAuz8JMLsb6',       
+        'Access-Control-Allow-Origin' : '*'
+    }
     };
     try {
         return axios.all(listOfURLs.map((endpoint) =>

@@ -55,14 +55,15 @@ recordRoutes.route("/read/list/:table").get(function (req, res) {
 
 function structure_petitions_body(parsed_data){
   const petitions_arr = [];
-  const sub_arrays = Math.floor(parsed_data.length / 30) 
-  const remainder = parsed_data.length % 30;
+  const max_len = 25;
+  const sub_arrays = Math.floor(parsed_data.length / max_len) 
+  const remainder = parsed_data.length % max_len;
 
   for( let i =0; i< sub_arrays; i++){
-    petitions_arr.push( parsed_data.slice(i*30, (i+1)*30))
+    petitions_arr.push( parsed_data.slice(i*max_len, (i+1)*max_len))
   };
   if(remainder !== 0){
-    petitions_arr.push(parsed_data.slice( sub_arrays * 30 , ( sub_arrays*30 ) + remainder))
+    petitions_arr.push(parsed_data.slice( sub_arrays * max_len , ( sub_arrays*max_len ) + remainder))
   }
   return petitions_arr;
 }
@@ -115,7 +116,7 @@ function return_graphql_data(data_list){
           country: CL, 
           identifier: "96301260-7_82580320-7_33_2000",   
           supplierIdentifier: "92580320-7",
-          payerIdentifier:"76301260-7", 
+          payerIdentifier:"76301260-8", 
           issueDate: "2022-06-01T00:00:00.000Z", 
           invoiceType: "33", 
           amount: 2000.3
@@ -173,11 +174,10 @@ recordRoutes.route("/xepelin_graphql").get(async function (req, response) {
       };
       axios(config)
         .then(function (response) {
-          console.log(JSON.stringify(response.data));
-        })
-        .catch(function (error) {
-          console.log(error);
-      });
+          // console.log(JSON.stringify(response.data));
+
+          console.log(response.data.errors, "error field")
+        });
       response.send({status: "everything gucci"});
  
   

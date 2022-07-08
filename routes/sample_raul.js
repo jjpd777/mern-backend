@@ -9,7 +9,7 @@ var data = JSON.stringify({
         country: CL, 
         identifier: "96301260-7_82580320-7_33_2000",   
         supplierIdentifier: "92580320-7",
-        payerIdentifier:"76301260-7", 
+        payerIdentifier:"76301260KFKFK-7", 
         issueDate: "2022-06-01T00:00:00.000Z", 
         invoiceType: "33", 
         amount: 2000.3
@@ -44,7 +44,8 @@ var config = {
 
 axios(config)
 .then(function (response) {
-  console.log(JSON.stringify(response.data));
+    console.log(JSON.stringify(response));
+    console.log("\\n\n\n")
 })
 .catch(function (error) {
   console.log(error);
