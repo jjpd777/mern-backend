@@ -4,6 +4,7 @@ const CUSTOMERS_TABLE = "customer-record";
 const recordRoutes = express.Router();
 const axios = require('axios');
 var parse = require('parse-link-header');
+const cors = require("cors");
 
 function fintocURL(issueType, linkToken, page) {
     const lt = "link_token=" + linkToken;
@@ -17,7 +18,7 @@ function fintocURL(issueType, linkToken, page) {
 
 const pingListInvoices = async (issueType, linkToken, page) => {
     const options = {
-        headers: { Accept: 'application/json', Authorization: 'sk_live_DWeF3Tfp2YCsVQoB3a-MPYAuz8JMLsb6',
+        headers: { Accept: 'application/json', Authorization: 'sk_live_2ce5tM2VZCtgpUXw7gBY51xgX46hEvAR',
         'Access-Control-Allow-Origin' : '*'
     }
     };
@@ -47,7 +48,7 @@ function getUniqueBuyers(all) {
 
 async function getAllData(listOfURLs) {
     const options = {
-        headers: { Accept: 'application/json', Authorization: 'sk_live_DWeF3Tfp2YCsVQoB3a-MPYAuz8JMLsb6',       
+        headers: { Accept: 'application/json',  Authorization: 'sk_live_2ce5tM2VZCtgpUXw7gBY51xgX46hEvAR',      
         'Access-Control-Allow-Origin' : '*'
     }
     };
@@ -135,7 +136,12 @@ async function fetchSumm(token) {
     return summary
 }
 
-recordRoutes.route("/processSAT/:token").get(async function (req, res) {
+recordRoutes.route("/processSAT/:token", cors({
+    origin:'*',
+    "Access-Control-Allow-Origin": '*',
+    credentials:true,            //access-control-allow-credentials:true
+    optionSuccessStatus:200,
+  })).get(async function (req, res) {
     const token = req.params.token;
     console.log("fetched token", token)
     try {
