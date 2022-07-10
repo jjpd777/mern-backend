@@ -16,7 +16,7 @@ function fintocURL(issueType, linkToken, page) {
 };
 
 
-const pingListInvoices = async (issueType, linkToken, page) => {
+const fintocSingleHit = async (issueType, linkToken, page) => {
     const options = {
         headers: { Accept: 'application/json', Authorization: 'sk_live_2ce5tM2VZCtgpUXw7gBY51xgX46hEvAR',
         'Access-Control-Allow-Origin' : '*'
@@ -121,7 +121,7 @@ async function fetchSumm(token) {
     // const asyncAllReceived = await getAllData(p_received);
 
 
-    const fetchIssued = await pingListInvoices("issued", token, 1);
+    const fetchIssued = await fintocSingleHit("issued", token, 1);
     // console.log(fetchIssued)
     const parsedIssued = parse(fetchIssued.headers.link);
     const p_issued = listOfPetitions(parsedIssued);
@@ -157,8 +157,23 @@ recordRoutes.route("/testSAT/:token").get(async function (req, res) {
     const token = req.params.token;
     console.log("fetched token", token)
     try {
-        const summary = await pingListInvoices("issued",token,1);
+        const summary = await fintocSingleHit("issued",token,1);
         return res.send({ summary });
+    } catch (error) {
+        console.log(error);
+    }
+});
+
+recordRoutes.route("/lastMonth/:token", cors({
+    origin:'*',
+    "Access-Control-Allow-Origin": '*',
+    optionSuccessStatus:200,
+  })).get(async function (req, res) {
+    const token = req.params.token;
+    console.log("fetched token", token)
+    try {
+        const summary = await fintocSingleHit("issued", token, 1);
+        return res.send( summary.data );
     } catch (error) {
         console.log(error);
     }
