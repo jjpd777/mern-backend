@@ -93,9 +93,9 @@ function summarizeCompany(invoices) {
         }
         invoices[rfc].map(item => {
             summary.totalSales += Number(item.total_amount);
-            if(rfc==="UME141031DR0"){
-                console.log("UFINET");
-            }
+            // if(rfc==="UME141031DR0"){
+            //     console.log("UFINET");
+            // }
             const ins = {
                 ticket_date: item.date,
                 ticket_amount: Number(item.total_amount),
@@ -131,7 +131,11 @@ async function fetchSumm(token) {
 
     // const groupedSellers = getUniqueSellers(asyncAllReceived);
     const groupedBuyers = getUniqueBuyers(asyncAllIssued);
-    const summary = summarizeCompany(groupedBuyers);
+    const summ = summarizeCompany(groupedBuyers);
+    function sortBySales(arr) {
+        return arr.sort((a, b) => (a.totalSales > b.totalSales) ? -1 : 1);
+      };
+    const summary = sortBySales(summ);
     return summary
 }
 
@@ -160,8 +164,10 @@ recordRoutes.route("/lastMonth/:token", cors({
   })).get(async function (req, res) {
     const token = req.params.token;
     try {
-        const summary = await fintocSingleHit("issued", token, 1);
-        return res.send( summary.data );
+        const summ = await fetchSumm(token);
+        const summary = summ.slice(0,4);
+        console.log(summary, "summa boi")
+        return res.send( {summary} );
     } catch (error) {
         console.log(error);
     }
