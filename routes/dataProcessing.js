@@ -24,7 +24,7 @@ const fintocSingleHit = async (issueType, linkToken, page) => {
     };
     const d = fintocURL(issueType, linkToken, page);
     return axios.get(d, options)
-        .then(response => { console.log("ping response",response); return response })
+        .then(response => { console.log("ping response"); return response })
         .catch(err => console.error(err));
 };
 
@@ -82,22 +82,24 @@ function listOfPetitions(pagesObject) {
 function summarizeCompany(invoices) {
     var global = [];
     const k = Object.keys(invoices);
+    console.log(k, "object keys for co")
     k.map(rfc => {
         var summary = {
             customer_rfc: rfc,
             customer_name: invoices[rfc][0].receiver.name,
             totalSales: 0,
             tax_period: {},
-            tax_period_sub:{}
+            tax_period_sub:{},
         }
         invoices[rfc].map(item => {
             summary.totalSales += Number(item.total_amount);
             if(rfc==="UME141031DR0"){
-                console.log("UFINET",item);
+                console.log("UFINET");
             }
             const ins = {
                 ticket_date: item.date,
                 ticket_amount: Number(item.total_amount),
+                full_invoice: item
             }
             const txp = item.tax_period
             if (!summary.tax_period[txp]) {
@@ -127,9 +129,6 @@ async function fetchSumm(token) {
     const p_issued = listOfPetitions(parsedIssued);
     const asyncAllIssued = await getAllData(p_issued);
 
-    // console.log(asyncAllReceived.length, "Received tax invoices");
-    console.log(asyncAllIssued.length, "Issued tax invoices");
-
     // const groupedSellers = getUniqueSellers(asyncAllReceived);
     const groupedBuyers = getUniqueBuyers(asyncAllIssued);
     const summary = summarizeCompany(groupedBuyers);
@@ -143,7 +142,6 @@ recordRoutes.route("/processSAT/:token", cors({
     optionSuccessStatus:200,
   })).get(async function (req, res) {
     const token = req.params.token;
-    console.log("fetched token", token)
     try {
         const summary = await fetchSumm(token);
         return res.send({ summary });
@@ -153,16 +151,7 @@ recordRoutes.route("/processSAT/:token", cors({
 
 });
 
-recordRoutes.route("/testSAT/:token").get(async function (req, res) {
-    const token = req.params.token;
-    console.log("fetched token", token)
-    try {
-        const summary = await fintocSingleHit("issued",token,1);
-        return res.send({ summary });
-    } catch (error) {
-        console.log(error);
-    }
-});
+
 
 recordRoutes.route("/lastMonth/:token", cors({
     origin:'*',
@@ -170,7 +159,6 @@ recordRoutes.route("/lastMonth/:token", cors({
     optionSuccessStatus:200,
   })).get(async function (req, res) {
     const token = req.params.token;
-    console.log("fetched token", token)
     try {
         const summary = await fintocSingleHit("issued", token, 1);
         return res.send( summary.data );
@@ -180,4 +168,13 @@ recordRoutes.route("/lastMonth/:token", cors({
 
 });
 
+recordRoutes.route("/testSAT/:token").get(async function (req, res) {
+    const token = req.params.token;
+    try {
+        const summary = await fintocSingleHit("issued",token,1);
+        return res.send({ summary });
+    } catch (error) {
+        console.log(error);
+    }
+});
 module.exports = recordRoutes;
