@@ -27,8 +27,8 @@ recordRoutes.route("/fetch").get(function (req, res) {
     });
 });
 
-recordRoutes.route("/fetchLinkId/:token").get(function (req, res) {
-  const token = req.params.token;
+recordRoutes.route("/fetchLinkId/:email_track").get(function (req, res) {
+  const token = req.params.email_track;
   console.log(token, "this email");
   let db_connect = dbo.getDb(MAIN_TABLE);
   db_connect
@@ -36,20 +36,20 @@ recordRoutes.route("/fetchLinkId/:token").get(function (req, res) {
     .find({"user.email": token})
     .toArray(function (err, result) {
       if (err) throw err;
+      console.log(result)
       res.json(result);
     });
 });
 
 recordRoutes.route("/fetchLinkToken/:token").get(function (req, res) {
   const token = req.params.token;
-  console.log(token, "this token")
   let db_connect = dbo.getDb(MAIN_TABLE);
   db_connect
     .collection(CUSTOMERS_TABLE+"/tokens")
     .find({id: token})
     .toArray(function (err, result) {
       if (err) throw err;
-      res.json(result);
+      res.json(result[ result.length-1]);
     });
 });
 

@@ -82,7 +82,6 @@ function listOfPetitions(pagesObject) {
 function summarizeCompany(invoices) {
     var global = [];
     const k = Object.keys(invoices);
-    console.log(k, "object keys for co")
     k.map(rfc => {
         var summary = {
             customer_rfc: rfc,
@@ -121,6 +120,9 @@ async function fetchSumm(token) {
     // const parsedReceived = parse(fetchReceived.headers.link);
     // const p_received = listOfPetitions(parsedReceived);
     // const asyncAllReceived = await getAllData(p_received);
+    // const groupedSellers = getUniqueSellers(asyncAllReceived);
+    // const summ = summarizeCompany(groupedSellers);
+
 
 
     const fetchIssued = await fintocSingleHit("issued", token, 1);
@@ -129,7 +131,6 @@ async function fetchSumm(token) {
     const p_issued = listOfPetitions(parsedIssued);
     const asyncAllIssued = await getAllData(p_issued);
 
-    // const groupedSellers = getUniqueSellers(asyncAllReceived);
     const groupedBuyers = getUniqueBuyers(asyncAllIssued);
     const summ = summarizeCompany(groupedBuyers);
     function sortBySales(arr) {
@@ -166,7 +167,6 @@ recordRoutes.route("/lastMonth/:token", cors({
     try {
         const summ = await fetchSumm(token);
         const summary = summ.slice(0,4);
-        console.log(summary, "summa boi")
         return res.send( {summary} );
     } catch (error) {
         console.log(error);
