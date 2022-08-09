@@ -1,4 +1,17 @@
 var axios = require('axios');
+
+const sample_AP ={ 
+  confirmedAt: "2022-06-03T00:00:00.000Z",
+  folio: "9233", 
+  country: "MX", 
+  identifier: "96301260-7_82580320-7_33_2000",   
+  supplierIdentifier: "92580320-7",
+  payerIdentifier:"7630142C069-7", 
+  issueDate: "2022-06-01T00:00:00.000Z", 
+  invoiceType: "33", 
+  amount: 20000.3
+};
+
 var data = JSON.stringify({
   query: `mutation MyMutation {
   batchCreateInvoice(invoices: 

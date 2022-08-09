@@ -36,7 +36,6 @@ recordRoutes.route("/read/link/:id").get(async function (req, res) {
   else{
     res.send({message:"terrible error just happened"})
   }
-
 });
 
 recordRoutes.route("/read/list/:table").get(function (req, res) {
@@ -205,6 +204,47 @@ try{
   console.log(e)
 }
 });
+
+recordRoutes.route("/sapb1_invoices").get(async function (req, res) {
+  const sap_url = "https://20.225.223.249:55000/b1s/v1/Login";
+    console.log(req)
+    const body = {"CompanyDB" : "SBODEMOMX", "UserName": "manager", "Password": "manager" };
+
+    function url_return (n){ return "https://20.225.223.249:55000/b1s/v1/Invoices?$skip="+ String(n);}
+    async function fetch_invoices(cookie){
+      const h = {headers:{  Accept: 'application/json', Cookie: cookie }}
+      var counter = 0; 
+
+      const inv_url = url_return(counter);
+      var fetch_data = await axios.get(inv_url, h);
+      const aggregate = [fetch_data.data.value];
+      
+      while(!!fetch_data.data['odata.nextLink'] && counter<20){
+        console.log(fetch_data.data['odata.nextLink'])
+        counter+=20;
+        var pop = await axios.get(url_return(counter), h).then( responz => {return responz});
+        aggregate.push( pop.data.value)
+        fetch_data = pop;
+
+      }
+      return aggregate;
+    }
+    async function fetch_cookie() {
+       return await axios.post(sap_url, body) 
+    }
+    
+  try{
+    const cookie = await fetch_cookie().then( r => r.headers["set-cookie"] );
+    const ft = await fetch_invoices(cookie);
+    res.send({invoices: ft});
+
+  } catch(e){
+    console.log(e)
+    res.send({e})
+  }
+});
+
+
 
 
 module.exports = recordRoutes;
