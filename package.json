@@ -25,6 +25,7 @@
     "moment": "^2.29.1",
     "mongodb": "^4.4.1",
     "node-fetch": "^3.2.6",
+    "package.json": "^2.0.1",
     "parse-link-header": "^2.0.0"
   },
   "devDependencies": {

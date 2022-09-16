@@ -1,10 +1,12 @@
 const express = require("express");
-const MAIN_TABLE = "saldada-v1";
+const MAIN_TABLE = "POWER_J";
 const CUSTOMERS_TABLE = "terms";
 const recordRoutes = express.Router();
 const dbo = require("../db/conn");
 const ObjectId = require('mongodb').ObjectId;
 const axios = require('axios');
+const fs = require('fs');
+const path = require('path');
 
 
 const requestHeaders = {
@@ -49,6 +51,33 @@ recordRoutes.route("/read/list/:table").get(function (req, res) {
       if (err) throw err;
       res.json(result);
     });
+});
+
+recordRoutes.route("/insert_supplier_invoices").get(async function (req, res) {
+
+  let db_connect = dbo.getDb(MAIN_TABLE);
+
+  const directoryPath = path.join(__dirname, 'Documents');
+  fs.readdir("./VP", function (err, files) {
+    //handling error
+    if (err) {
+        return console.log('Unable to scan directory: ' + err);
+    } 
+    //listing all files using forEach
+    files.forEach( async function (file) {
+        // Do whatever you want to do with the file
+        let rawdata = fs.readFileSync("./VP/"+file);
+        let data = JSON.parse(rawdata);
+        console.log(file); 
+        await db_connect.collection("PODER_JUSTO").insertMany( data, function (err, res) {
+          if (err) throw err;
+        });
+        
+        });
+    });
+
+
+  res.send({status:"gud"})
 });
 
 
@@ -140,26 +169,8 @@ function return_graphql_data(data_list){
 }
 
 recordRoutes.route("/xepelin_graphql").get(async function (req, response) {
-  /// read the csv file
-  const data_origin = "https://firebasestorage.googleapis.com/v0/b/saldada-dev.appspot.com/o/xepelin_sample.xlsx%20-%20Worksheet.tsv?alt=media&token=390ab1a4-2278-40bc-acac-6e9a33d52a46";
-  await axios.get(data_origin, options)
-    .then(data_tsv => { 
-      const tsv_split = data_tsv.data.split("\r\n"); const reference_keys = tsv_split[0].split("\t");
-      const parsed_data = []; 
-      tsv_split.map( (row, ix)=>{
-        if(ix!==0){
-          const d = row.split("\t"); const objct = {
-            "dependency_score" : "TOP_SUPPLIER",
-            "year_first_purchase" : "2017",
-            "average_purchase" : "44,7994.00"
-          };
-          d.map( (x, index) =>{ objct[reference_keys[index]]= x })
-          parsed_data.push(objct);
-        };
-      });
       const xepelin_url = 'https://ubx5pawdbrbynmkkv77xuqpn34.appsync-api.us-east-1.amazonaws.com/graphql';
-      const structured_petitions = structure_petitions_body(parsed_data);
-      const data = return_graphql_data(structured_petitions[0]);
+      const data = return_graphql_data([]);
       console.log(typeof(data))
 
       var config = {
@@ -171,16 +182,9 @@ recordRoutes.route("/xepelin_graphql").get(async function (req, response) {
         },
         data : data
       };
-      axios(config)
-        .then(function (response) {
-          // console.log(JSON.stringify(response.data));
-
-          console.log(response.data.errors, "error field")
-        });
+      axios(config).then( r => console.log(r)).catch(e=> console.log(e, "error mf"))
       response.send({status: "everything gucci"});
- 
-  
-  });
+    ;
 });
 
 recordRoutes.route("/receive_information").post(function (req, response) {
@@ -205,45 +209,122 @@ try{
 }
 });
 
-recordRoutes.route("/sapb1_invoices").get(async function (req, res) {
-  const sap_url = "https://20.225.223.249:55000/b1s/v1/Login";
-    console.log(req)
-    const body = {"CompanyDB" : "SBODEMOMX", "UserName": "manager", "Password": "manager" };
 
-    function url_return (n){ return "https://20.225.223.249:55000/b1s/v1/Invoices?$skip="+ String(n);}
-    async function fetch_invoices(cookie){
-      const h = {headers:{  Accept: 'application/json', Cookie: cookie }}
-      var counter = 0; 
 
-      const inv_url = url_return(counter);
-      var fetch_data = await axios.get(inv_url, h);
-      const aggregate = [fetch_data.data.value];
-      
-      while(!!fetch_data.data['odata.nextLink'] && counter<20){
-        console.log(fetch_data.data['odata.nextLink'])
-        counter+=20;
-        var pop = await axios.get(url_return(counter), h).then( responz => {return responz});
-        aggregate.push( pop.data.value)
-        fetch_data = pop;
 
+// ###########################################################################################
+// ###########################################################################################
+// ###########################################################################################
+
+
+const sap_endpoint = true ? "https://10.10.10.4:50000/b1s/v1/" : "https://20.225.223.249:55000/b1s/v1/";
+const sap_auth = sap_endpoint+ "Login";
+const body = {"CompanyDB" : "PRUEBAS_PODER_JUSTO", "UserName": "pj_sistemas", "Password": "W4M2NS4y9h" };
+async function fetch_cookie() {
+       return await axios.post(sap_auth, body).then( r => r.headers["set-cookie"] );
+};
+
+function url_for_endpoint (object, n){ 
+  return sap_endpoint + object + "?$skip="+ String(n);
+};
+
+
+async function write_sync (name,data){
+  try { 
+  fs.writeFileSync(name, data); 
+  console.log("File has been saved."); 
+  } catch (error) { 
+  console.error(err); 
+  } 
+}
+
+
+
+async function write_file( file_string, file){
+  return fs.writeFile(file_string, file, 'utf8', function (err) {
+      if (err) {
+          console.log("An error occured while writing JSON Object to File.");
+          return console.log(err);
       }
-      return aggregate;
+      return  console.log("JSON file has been saved.");
+  })
+
+};
+async function fetch_data_SAPB1(cookie, table, chunk){
+  const h = { headers:{ Accept: 'application/json', Cookie: cookie }};
+  var counter = 33020;
+
+  const fetch_url = url_for_endpoint( table, counter);
+  var fetch_data = await axios.get(fetch_url, h);
+
+  var aggregate = [];
+  aggregate.push(...fetch_data.data.value);
+  let db_connect = dbo.getDb("powerJUSTO");
+
+  
+  while(!!fetch_data.data['odata.nextLink']){
+    counter+=20;
+    const endpoint = url_for_endpoint(table, counter);
+    var pop = await axios.get( endpoint , h).then( responz => {return responz});
+    aggregate.push(...pop.data.value);
+
+
+    if(counter%200 ===0){
+          // await write_file("./CreditNotes/purchase-inv-"+String(counter)+".json", JSON.stringify(aggregate));
+          console.log(db_connect);
+          await db_connect.collection("purchase-invoices-full").insertMany( aggregate, function (err, res) {
+            console.log("this mfqer")
+            if (err) throw err;
+          });
+          aggregate=[];
     }
-    async function fetch_cookie() {
-       return await axios.post(sap_url, body) 
-    }
-    
+    fetch_data = pop;
+  };
+  if(aggregate.length!==0){
+      // await write_file("./CreditNotes/purchase-inv-"+String(counter)+".json", JSON.stringify(aggregate));
+      await db_connect.collection("purchase-invoices-full").insertMany(aggregate, function (err, res) {
+        if (err) throw err;
+      });
+  }
+  return aggregate;
+};
+
+async function purchase_invoices_parser(extracted){
+   return extracted.map( x=>{
+      return { 
+          status_confirmed: x.Confirmed,
+          cancel_status: x.CancelStatus,
+          payment_group: x.PaymentGroupCode,
+          confirmedAt: x.UpdateDate + "T"+ x.UpdateTime +".000Z",
+          folio: x.DocEntry, 
+          country: "MX", 
+          identifier: x.NumAtCard ,   
+          supplierIdentifier: x.FederalTaxID,
+          payerIdentifier:"PODER_JUSTO_RFC", 
+          issueDate: x.DocDate + "T"+ x.DocTime + ".000Z",
+          invoiceType: "33", 
+          amount: x.DocTotal,
+          comments: x.Comments
+    }});
+}
+
+recordRoutes.route("/sapb1_vendor_payments").get(async function (req, res) { 
   try{
-    const cookie = await fetch_cookie().then( r => r.headers["set-cookie"] );
-    const ft = await fetch_invoices(cookie);
-    res.send({invoices: ft});
+
+    const cookie = await fetch_cookie();
+    const extracted = await fetch_data_SAPB1(cookie, "PurchaseInvoices",10000);
+
+    // const m = await purchase_invoices_parser(extracted);
+
+    // write_file("pc-notes.json", JSON.stringify(extracted));
+
+    res.send({invoices: "success"});
 
   } catch(e){
     console.log(e)
     res.send({e})
   }
 });
-
 
 
 
