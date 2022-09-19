@@ -49,7 +49,7 @@ recordRoutes.route("/read/link/:id").get(async function (req, res) {
 recordRoutes.route("/sapb1_vendor_payments").get(async function (req, res) { 
   try{
 
-    await fetch_data_SAPB1( "Invoices","customer-invoices-full");
+    await fetch_data_SAPB1( "PurchaseInvoices","demo-thang");
 
     res.send({invoices: "success"});
 

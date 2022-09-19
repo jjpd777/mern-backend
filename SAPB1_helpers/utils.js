@@ -7,6 +7,17 @@ const sap_endpoint = true ? "https://10.10.10.4:50000/b1s/v1/" : "https://20.225
 const sap_auth = sap_endpoint + "Login";
 const body = { "CompanyDB": "PRUEBAS_PODER_JUSTO", "UserName": "pj_sistemas", "Password": "W4M2NS4y9h" };
 
+async function write_file(file_string, file) {
+    return fs.writeFile(file_string, file, 'utf8', function (err) {
+        if (err) {
+            console.log("An error occured while writing JSON Object to File.");
+            return console.log(err);
+        }
+        return console.log("JSON file has been saved.");
+    })
+
+};
+
 function url_for_endpoint(object, n) {
     return sap_endpoint + object + "?$skip=" + String(n);
 };
@@ -33,6 +44,7 @@ module.exports = async function fetch_data_SAPB1(table, table_title) {
     var aggregate = [];
     aggregate.push(...fetch_data.data.value);
     let db_connect = dbo.getDb("powerJUSTO");
+    write_file("purchase-invoice-template.json", JSON.stringify(aggregate))
 
 
     while (!!fetch_data.data['odata.nextLink']) {
@@ -53,13 +65,3 @@ module.exports = async function fetch_data_SAPB1(table, table_title) {
     return aggregate;
 };
 
-async function write_file(file_string, file) {
-    return fs.writeFile(file_string, file, 'utf8', function (err) {
-        if (err) {
-            console.log("An error occured while writing JSON Object to File.");
-            return console.log(err);
-        }
-        return console.log("JSON file has been saved.");
-    })
-
-};
