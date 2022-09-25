@@ -59,7 +59,7 @@ function return_graphql_data(data_list){
   try{
     console.log(req)
     const path = req.header.enterprise; const data = req.body.data;
-    let db_connect = dbo.getDb(MAIN_TABLE);
+    let db_connect = dbo.getDb();
   
     // db_connect.collection("AGROSUPER").insertMany( data, function (err, res) {
     //   if (err) throw err;

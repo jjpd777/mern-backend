@@ -17,7 +17,7 @@ const ObjectId = require("mongodb").ObjectId;
 
 // This section will help you get a list of all the records.
 recordRoutes.route("/fetch").get(function (req, res) {
-  let db_connect = dbo.getDb(MAIN_TABLE);
+  let db_connect = dbo.getDb();
   db_connect
     .collection(CUSTOMERS_TABLE)
     .find({})
@@ -30,7 +30,7 @@ recordRoutes.route("/fetch").get(function (req, res) {
 recordRoutes.route("/fetchLinkId/:email_track").get(function (req, res) {
   const token = req.params.email_track;
   console.log(token, "this email");
-  let db_connect = dbo.getDb(MAIN_TABLE);
+  let db_connect = dbo.getDb();
   db_connect
     .collection("fintoc-user")
     .find({"user.email": token})
@@ -43,7 +43,7 @@ recordRoutes.route("/fetchLinkId/:email_track").get(function (req, res) {
 
 recordRoutes.route("/fetchLinkToken/:token").get(function (req, res) {
   const token = req.params.token;
-  let db_connect = dbo.getDb(MAIN_TABLE);
+  let db_connect = dbo.getDb();
   db_connect
     .collection(CUSTOMERS_TABLE+"/tokens")
     .find({id: token})
