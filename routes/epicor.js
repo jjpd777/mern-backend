@@ -6,6 +6,8 @@ const fetch_SAPB1_write_MONGO = require('../SAPB1_helpers/utils');
 const purchase_credit_notes = require('../SAPB1_helpers/credit_notes_parser');
 const purchase_invoices = require('../SAPB1_helpers/purchase_invoices_parser');
 const parse_suppliers = require('../SAPB1_helpers/suppliers_parser')
+const fetch_SAPB1_write_LOCAL = require('../SAPB1_helpers/vendor_payments_parser');
+const read_write_vendor_payments = require('../SAPB1_helpers/VendorUtils/write_excel_format');
 
 
 
@@ -124,9 +126,10 @@ recordRoutes.route("/api/read_all/:table").get(async function (req, res) {
 
 });
 
-recordRoutes.route("/api/v1/parse_suppliers").get(async function (req, res) {
+recordRoutes.route("/api/v1/parse_vendor_payments").get(async function (req, res) {
 
-  await parse_suppliers()
+  // await fetch_SAPB1_write_LOCAL("VendorPayments")
+  read_write_vendor_payments("document name")
 
 });
 
