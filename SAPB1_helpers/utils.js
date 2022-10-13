@@ -44,8 +44,10 @@ module.exports = async function fetch_SAPB1_write_MONGO(table, table_title) {
         if(table === "BusinessPartners"){
             buff= extract_suppliers(petition_response.data.value);
             console.log(aggregate);
-        }else{
+        }
+        else{
             buff = petition_response.data.value;
+            buff.map( e => e.U_AutFinanzas !=="NO" && console.log(e, "Exitoso"));
         }
 
         aggregate.push( ...buff );
