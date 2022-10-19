@@ -56,7 +56,8 @@ recordRoutes.route("/api/:object_doc").get(async function (req, res) {
   const documents = {
     "purchase-invoices-x" : "PurchaseInvoices",
     "purchase-credit-notes-x" : "PurchaseInvoices",
-    "purchase-orders-xx" : "PurchaseInvoices",
+    "inventory-x" : "Items",
+    "purchase-orders-xx" : "PurchaseOrders",
     "vendor-payments-x" : "VendorPayments",
     "suppliers-detail-x" : "BusinessPartners",
   };
