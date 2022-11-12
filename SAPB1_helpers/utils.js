@@ -10,7 +10,7 @@ const body = { "CompanyDB": "PRUEBAS_PODER_JUSTO", "UserName": "pj_sistemas", "P
 const production_credentials = { "CompanyDB": "PODER_JUSTO", "UserName": "pj_administracion", "Password": "180788" };
 
 function url_for_endpoint(object, n) {
-    return sap_endpoint + object + "?$skip=" + String(n);
+    return sap_endpoint + object + "?$skip=" + String(70000+n);
 };
 
 async function fetch_cookie() {
@@ -70,22 +70,36 @@ function suppliers_parser(x){
 
 
 function purchase_invoices_parser(x){
+    if(x.U_AutFinanzas==='SI'){
+        console.log(x.U_UDF_UUID, x.NumAtCard);
+    }
        return { 
-           status_confirmed: x.Confirmed,
-           cancel_status: x.CancelStatus,
-           confirmedAt: x.UpdateDate + "T"+ x.UpdateTime +".000Z",
+           supplier_name: x.CardName,
+           card_number: x.NumAtCard,
            folio: x.DocEntry, 
-           country: "MX", 
-           identifier: x.NumAtCard ,   
-           supplierIdentifier: x.FederalTaxID,
-           payerIdentifier:"PODER_JUSTO_RFC", 
-           issueDate: x.DocDate + "T"+ x.DocTime + ".000Z",
-           invoiceType: "IVAA16", 
-           amount: x.DocTotal,
+           cancel_status: x.CancelStatus,
+           fiscal_id: x.FederalTaxID,
+           fiscal_ID_2: x.U_UDF_UUID,
+           issue_date: x.DocDate + "&"+ x.DocTime ,
+           due_date: x.DocDueDate,
+           authorized_finance: x.U_AutFinanzas,
+           credit_note: x.U_FactReferencia,
            comments_1: x.Comments,
            comments_2: x.NFRef
      };
  };
+
+ function parse_function_write_xepelin(x){
+    console.log(x.DocDueDate)
+     return {
+        confirmedAt: x.DocDueDate + "T17:00:00.000Z",
+        identifier: x.U_UDF_UUID,
+        supplierIdentifier: x.FederalTaxID,
+        payerIdentifier:"PJU190215RN2", 
+        issueDate: x.DocDate + "T"+ x.DocTime + ".000Z",
+        amount: x.DocTotal
+   }
+ }
 
 
 module.exports = async function fetch_SAPB1_write_MONGO(table, table_title) {
@@ -102,6 +116,7 @@ module.exports = async function fetch_SAPB1_write_MONGO(table, table_title) {
         petition_response = await axios.get(endpoint, cookie).then( r => r);
 
         var buff = petition_response.data.value;
+
         if(table === "BusinessPartners"){
             buff = buff.filter( p =>  p.CardType !=="cCustomer");
             buff = buff.map( p => suppliers_parser(p));
@@ -110,8 +125,8 @@ module.exports = async function fetch_SAPB1_write_MONGO(table, table_title) {
             buff = buff.map( p => purchase_orders_parser(p));
         }
         else if( table === "PurchaseInvoices" ){
-            buff = buff.map( p => purchase_invoices_parser(p))
-        }
+            buff = buff.map( p => p.U_AutFinanzas==='SI' && parse_function_write_xepelin(p))
+        };
 
         aggregate.push( ...buff );
 
@@ -119,13 +134,13 @@ module.exports = async function fetch_SAPB1_write_MONGO(table, table_title) {
 
         // !write_local && write_table_mongoDB(db_connect, aggregate, table_title);
 
-        const additional_condition = counter % 200 ===0 && aggregate.length >0;
+        // const additional_condition = counter % 2000 ===0 && aggregate.length >0;
 
-        // const check_local_write = write_local && (!petition_response.data['odata.nextLink']);
+        const check_local_write = write_local && (!petition_response.data['odata.nextLink']);
 
-        if(additional_condition){
+        if(check_local_write){
             await write_file(
-                "./RawData/" + table_title +"-"  + String(counter)+".json", 
+                "./RawData/" + table_title+"scrapped-11-11-22" +"-"  + String(aggregate.length)+".json", 
                 JSON.stringify(aggregate)
             )
             aggregate= [];

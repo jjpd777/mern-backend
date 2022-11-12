@@ -8,14 +8,10 @@ const purchase_invoices = require('../SAPB1_helpers/purchase_invoices_parser');
 const parse_suppliers = require('../SAPB1_helpers/suppliers_parser')
 const fetch_SAPB1_write_LOCAL = require('../SAPB1_helpers/vendor_payments_parser');
 const read_write_vendor_payments = require('../SAPB1_helpers/VendorUtils/write_excel_format');
+const axios = require('axios');
 
 
 
-const requestHeaders = {
-  Accept: 'application/json',
-};
-
-const options = { headers: requestHeaders };
 
 recordRoutes.route("/insert").post(function (req, response) {
   const path = req.body.path; const data = req.body;
@@ -67,6 +63,55 @@ recordRoutes.route("/api/:object_doc").get(async function (req, res) {
   {
     await fetch_SAPB1_write_MONGO( document_object ,path);
     res.send({invoices: "success"});
+  } 
+  catch(e)
+  {
+    console.log(e)
+    res.send({e})
+  }
+});
+
+recordRoutes.route("/test/Xepelin").get(async function (req, res) {
+
+  const xepelin_url = 'https://keanvojnbj.execute-api.us-east-1.amazonaws.com/v1/invoices/confirmation';
+  
+  const headers = { headers: {
+    Accept: 'application/json',
+    'x-api-key': '1r4MRroILP9icMQa0bjM4qMLsbtUrSQ6WQmEeN62'
+  } };
+  
+
+  const documents = [{
+    "identifier": "7ea86a80-96ff-4423-9b62-73622875070e",
+    "payerIdentifier": "PDE140513FR0",
+    "supplierIdentifier": "TME840315KT6",
+    "issueDate": "2022-05-20T17:02:49.000Z",
+    "confirmedAt": "2022-05-20T17:02:49.000Z",
+    "amount": 825598.435
+    }];
+
+  try
+  {
+    const result = await axios.post( 
+      
+      'https://keanvojnbj.execute-api.us-east-1.amazonaws.com/v1/invoices/confirmation', 
+      
+      [{
+        "identifier": "7ea86a80-96ff-4423-9b62-73622875070e",
+        "payerIdentifier": "PDE140513FR0",
+        "supplierIdentifier": "TME840315KT6",
+        "issueDate": "2022-05-20T17:02:49.000Z",
+        "confirmedAt": "2022-05-20T17:02:49.000Z",
+        "amount": 825598.435
+        }], 
+      {
+      headers:{
+        'Authorization' : '1r4MRroILP9icMQa0bjM4qMLsbtUrSQ6WQmEeN62',
+        'Content-Type': 'application/json',
+        'x-api-key': '1r4MRroILP9icMQa0bjM4qMLsbtUrSQ6WQmEeN62'
+      }
+    })
+    res.send({response: result});
   } 
   catch(e)
   {
