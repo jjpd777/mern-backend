@@ -5,8 +5,6 @@ const ObjectId = require('mongodb').ObjectId;
 const fetch_SAPB1_write_MONGO = require('../SAPB1_helpers/utils');
 const purchase_credit_notes = require('../SAPB1_helpers/credit_notes_parser');
 const purchase_invoices = require('../SAPB1_helpers/purchase_invoices_parser');
-const parse_suppliers = require('../SAPB1_helpers/suppliers_parser')
-const fetch_SAPB1_write_LOCAL = require('../SAPB1_helpers/vendor_payments_parser');
 const read_write_vendor_payments = require('../SAPB1_helpers/VendorUtils/write_excel_format');
 const axios = require('axios');
 
@@ -50,6 +48,7 @@ recordRoutes.route("/api/:object_doc").get(async function (req, res) {
   const path = req.params.object_doc;
 
   const documents = {
+    "invoices-x" : "Invoices",
     "purchase-invoices-x" : "PurchaseInvoices",
     "purchase-credit-notes-x" : "PurchaseInvoices",
     "inventory-x" : "Items",

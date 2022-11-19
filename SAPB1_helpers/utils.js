@@ -10,7 +10,14 @@ const body = { "CompanyDB": "PRUEBAS_PODER_JUSTO", "UserName": "pj_sistemas", "P
 const production_credentials = { "CompanyDB": "PODER_JUSTO", "UserName": "pj_administracion", "Password": "180788" };
 
 function url_for_endpoint(object, n) {
-    return sap_endpoint + object + "?$skip=" + String(70000+n);
+    const NOTE_WHERE = 340500;
+
+    const select_fields = 'NumAtCard, DocumentLines';
+    const r = sap_endpoint + object + "?$filter=DocDate ge '2022-09-15'&$skip="+ String(n);
+    // const r = sap_endpoint + object + "?$skip="+ String(341000+n) + '&$select='+ select_fields;
+    // console.log(r);
+    return r
+    
 };
 
 async function fetch_cookie() {
@@ -90,8 +97,7 @@ function purchase_invoices_parser(x){
  };
 
  function parse_function_write_xepelin(x){
-    console.log(x.DocDueDate)
-     return {
+    return {
         confirmedAt: x.DocDueDate + "T17:00:00.000Z",
         identifier: x.U_UDF_UUID,
         supplierIdentifier: x.FederalTaxID,
@@ -99,7 +105,39 @@ function purchase_invoices_parser(x){
         issueDate: x.DocDate + "T"+ x.DocTime + ".000Z",
         amount: x.DocTotal
    }
- }
+ };
+
+ function parse_alternate_write_xepelin(x){
+    return {
+        authorized_finnance: x.U_AutFinanzas,
+        confirmedAt: x.DocDueDate + "T17:00:00.000Z",
+        identifier: x.U_UDF_UUID,
+        supplierIdentifier: x.FederalTaxID,
+        payerIdentifier:"PJU190215RN2", 
+        issueDate: x.DocDate + "T"+ x.DocTime + ".000Z",
+        amount: x.DocTotal
+   }
+ };
+
+ function extract_sales_items( i , txn_id){
+    return {
+        txn: txn_id,
+        item_code: i.ItemCode,
+        issue_date: i.DocDate,
+        issue_time: i.DocTime,
+        due_date: i.DocDueDate,
+        barcode: i.BarCode,
+        item_description: i.ItemDescription,
+        item_quantity: i.Quantity,
+        ship_date: i.ShipDate,
+        item_price: i.Price,
+        item_discount: i.DiscountPercent,
+        warehouse: i.WarehouseCode,
+        tax_code: i.TaxCode,
+        item_buy_price: i.GrossBuyPrice,
+        item_gross_profit: i.GrossProfit
+    }
+};
 
 
 module.exports = async function fetch_SAPB1_write_MONGO(table, table_title) {
@@ -110,9 +148,11 @@ module.exports = async function fetch_SAPB1_write_MONGO(table, table_title) {
     const cookie = await fetch_cookie();
     var petition_response = {data: {'odata.nextLink': true}}
     var aggregate = [];
+    var missing_conf = [];
 
     while(!!petition_response.data['odata.nextLink']) {
         const endpoint = url_for_endpoint(table, counter);
+        console.log("Fetching... ", endpoint)
         petition_response = await axios.get(endpoint, cookie).then( r => r);
 
         var buff = petition_response.data.value;
@@ -125,23 +165,45 @@ module.exports = async function fetch_SAPB1_write_MONGO(table, table_title) {
             buff = buff.map( p => purchase_orders_parser(p));
         }
         else if( table === "PurchaseInvoices" ){
-            buff = buff.map( p => p.U_AutFinanzas==='SI' && parse_function_write_xepelin(p))
+            buff = buff.map( (p, ix )=> {
+                ix ===0 && console.log(p.DocDate);
+                p.U_AutFinanzas ==='SI' && console.log(p.DocNum, p.DocDate, p.DocDueDate, p.U_AutFinanzas);
+                (p.FederalTaxID === 'VIF2003035Y7' || p.FederalTaxID === 'AAPF920121MW0' || p.FederalTaxID === 'MUCL870831UK3')
+                && missing_conf.push( parse_alternate_write_xepelin(p))
+                return p.U_AutFinanzas==='SI' && parse_function_write_xepelin(p)});
+            buff = buff.filter( x=> !!x);
+        }
+        else if( table === "Invoices" ){
+            var temporal = [];
+            buff.map( p => {
+                const txn_id = p.NumAtCard;
+                console.log("This many items purchased: ", p.DocumentLines.length)
+                p.DocumentLines.map( item_purchase => 
+                    temporal.push( 
+                        extract_sales_items( item_purchase, txn_id) 
+                    ));
+            });
+            buff = temporal;
         };
 
         aggregate.push( ...buff );
+        console.log( counter , " scrapper parser --", aggregate.length, " aggregate length");
 
-      
+        // const additional_condition = counter !== 0 && (counter % 10000 ===0 );
 
-        // !write_local && write_table_mongoDB(db_connect, aggregate, table_title);
-
-        // const additional_condition = counter % 2000 ===0 && aggregate.length >0;
-
-        const check_local_write = write_local && (!petition_response.data['odata.nextLink']);
+        // const check_local_write = additional_condition || (!petition_response.data['odata.nextLink']);
+        const check_local_write = !petition_response.data['odata.nextLink'];
 
         if(check_local_write){
+            missing_conf.map( xx => console.log(xx));
             await write_file(
-                "./RawData/" + table_title+"scrapped-11-11-22" +"-"  + String(aggregate.length)+".json", 
+                "./RawData/" + table_title+"purchase_invoices_PJ_"+ + String(aggregate.length)+".json", 
                 JSON.stringify(aggregate)
+            )
+
+            await write_file(
+                "./RawData/" + table_title+"general_scrapped_PJ_"+ + String(missing_conf.length)+".json", 
+                JSON.stringify(missing_conf)
             )
             aggregate= [];
         };
